@@ -140,13 +140,14 @@ function render() {
     notesDirty = true;
   }
 
-  const layout = [visible, hasNotes, s.title, s.timingPct, s.notesMaxPct,
+  const layout = [visible, hasNotes, s.title, s.timingPct, s.notesMaxPct, s.notesColumns,
     window.innerWidth, window.innerHeight].join('|');
   if (layout !== lastLayout) {
     lastLayout = layout;
     setText(els.title, s.title.trim());
     document.body.classList.toggle('has-notes', hasNotes);
     document.documentElement.style.setProperty('--timing-h', s.timingPct + '%');
+    els.notesInner.style.columnCount = Math.max(1, Math.round(s.notesColumns) || 1);
     applyLayout(visible, hasNotes);
     notesDirty = true;
   }

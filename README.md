@@ -46,7 +46,7 @@ is correct even when a window has been in the background or the computer slept.
 - Show or hide the current time (optionally with seconds), the end time, and the countdown
 - An optional title, such as the exam name
 - 24-hour or 12-hour clock
-- Clarification size and how much room the timer gets when clarifications are shown
+- Clarification size, number of columns (1 by default), and how much room the timer gets when clarifications are shown
 
 The display also keeps the screen from going to sleep (where the browser supports it)
 and hides the mouse cursor when it isn't moving.

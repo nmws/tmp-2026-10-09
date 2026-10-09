@@ -24,7 +24,8 @@ const DEFAULT_SETTINGS = {
   coarseStepMin: 5,
   secondsBelowMin: 3,    // at or below this, show minutes and seconds
   notesMaxPct: 8,        // largest clarification font, % of screen height
-  timingPct: 30,         // timer strip height when clarifications are shown, %
+  notesColumns: 1,       // number of columns the clarifications are split into
+  timingPct: 30,        // timer strip height when clarifications are shown, %
 };
 
 const DEFAULT_STATE = {
