@@ -28,13 +28,14 @@ The timer sits in a strip at the top of the screen that always keeps its space
 clarifications fill the rest of the screen does the strip shrink, down to 25%;
 after that the clarification text shrinks instead.
 
-The countdown is precise by default, e.g. `1:45:00` or `12:47`. It is white, turns
-orange at 5 minutes left (which is also when seconds appear in the rounded format),
+The countdown is rounded up to a multiple of a number of minutes (1 by default) and
+prefixed with `~`, e.g. `~1 h 45 min` or `~12 min`, so it never claims more time is
+left than the real amount allows for. In the last 5 minutes it switches to exact
+minutes and seconds, e.g. `4:47`. It is white, turns orange in the last 5 minutes,
 and turns red once time is up, counting up as `−1:23`.
 
-Under **Display** you can instead round the countdown: it is then prefixed with `~`
-and rounded up, to 5 min while more than 30 min are left (e.g. `~1 h 45 min`) and to
-whole minutes below that (`~12 min`). The thresholds and sizes can be changed there too.
+The rounding, the point where seconds start, and the orange threshold are each
+set under **Display**.
 
 The countdown is always calculated from the end time and the system clock, so it
 is correct even when a window has been in the background or the computer slept.

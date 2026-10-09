@@ -17,10 +17,9 @@ const DEFAULT_SETTINGS = {
   showEnd: true,
   showCountdown: true,
   hourCycle: 'auto',     // 'auto' | 'h23' | 'h12'
-  orangeMin: 5,          // countdown turns orange (and shows seconds) at or below this many minutes
-  roundCountdown: false, // round the countdown to coarseStepMin, shown with a ~ prefix
-  coarseAboveMin: 30,    // when rounding: above this, round to coarseStepMin
-  coarseStepMin: 5,
+  roundMin: 1,           // the countdown is rounded up to a multiple of this many minutes
+  secondsMin: 5,         // in the last this many minutes, show minutes and seconds instead
+  orangeMin: 5,          // countdown turns orange at or below this many minutes
   notesMaxPct: 8,        // largest clarification font, % of screen height
   timingPct: 40,         // timer strip height, % of screen height
   timingMinPct: 25,      // ...which shrinks to this when the clarifications need the room
@@ -82,16 +81,16 @@ function formatHMS(totalSec) {
   return h ? `${h}:${pad2(m)}:${pad2(s)}` : `${m}:${pad2(s)}`;
 }
 
-// The countdown shown on the projector. Precise by default; with
-// `roundCountdown` the minutes are rounded *up* and prefixed with "~", so
-// "~5 min" means "at most 5 minutes left". Seconds appear from orange onwards.
+// The countdown shown on the projector. Minutes are rounded *up* to a multiple
+// of `roundMin` and prefixed with "~", so "~5 min" means "at most 5 minutes
+// left". In the last `secondsMin` minutes it is exact, as minutes and seconds.
 function formatCountdown(ms, s) {
   if (ms <= 0) {
     const over = Math.floor(-ms / 1000);
     return over === 0 ? '0:00' : '−' + formatHMS(over);
   }
-  if (!s.roundCountdown || ms <= s.orangeMin * MINUTE) return formatHMS(Math.ceil(ms / 1000));
-  const step = ms > s.coarseAboveMin * MINUTE ? Math.max(1, s.coarseStepMin) : 1;
+  if (ms <= s.secondsMin * MINUTE) return formatHMS(Math.ceil(ms / 1000));
+  const step = Math.max(1, s.roundMin);
   return '~' + formatHM(Math.ceil(ms / (step * MINUTE)) * step);
 }
 
