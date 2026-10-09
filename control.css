@@ -128,7 +128,7 @@ button.danger { color: var(--danger); }
 .status { margin: 0; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
 .status strong { font-size: 1.4rem; }
 .status.orange strong { color: var(--orange); }
-.status.red strong, .status.over strong { color: var(--red); }
+.status.over strong { color: var(--red); }
 
 #previewFrame {
   position: relative;

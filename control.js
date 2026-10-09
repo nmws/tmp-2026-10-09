@@ -55,12 +55,6 @@ $('endForm').addEventListener('submit', (e) => {
   update({ endTime: end.getTime(), pausedAt: null });
 });
 
-$('adjust').addEventListener('click', (e) => {
-  const minutes = Number(e.target.dataset.adjust);
-  if (!minutes || state.endTime == null) return;
-  update({ endTime: state.endTime + minutes * MINUTE });
-});
-
 $('pause').addEventListener('click', () => {
   if (state.endTime == null) return;
   const now = roundToSecond(Date.now());
@@ -71,10 +65,19 @@ $('pause').addEventListener('click', () => {
   }
 });
 
-$('reset').addEventListener('click', (e) => {
-  if (confirmedClick(e.currentTarget, 'Clear? Click again')) {
-    update({ endTime: null, pausedAt: null });
-  }
+// Clearing acts at once (a two-click confirmation that times out was easy to
+// miss) and can be undone until a new timer is set.
+let cleared = null;
+
+$('reset').addEventListener('click', () => {
+  if (state.endTime == null) return;
+  cleared = { endTime: state.endTime, pausedAt: state.pausedAt };
+  update({ endTime: null, pausedAt: null });
+});
+
+$('undoClear').addEventListener('click', () => {
+  if (cleared) update(cleared);
+  cleared = null;
 });
 
 // ---- Clarifications ------------------------------------------------------
@@ -131,12 +134,7 @@ for (const input of settingInputs) {
   });
 }
 
-$('title').addEventListener('input', (e) => update({ title: e.target.value }));
-
-$('resetSettings').addEventListener('click', () => {
-  const { title, ...defaults } = DEFAULT_SETTINGS;
-  update(defaults);
-});
+$('resetSettings').addEventListener('click', () => update(DEFAULT_SETTINGS));
 
 function renderSettings() {
   for (const input of settingInputs) {
@@ -145,7 +143,6 @@ function renderSettings() {
     if (input.type === 'checkbox') input.checked = value;
     else input.value = value;
   }
-  if ($('title') !== document.activeElement) $('title').value = state.title;
 }
 
 // ---- Status --------------------------------------------------------------------
@@ -157,29 +154,30 @@ function renderTimer() {
   const hasTimer = ms != null;
   const paused = state.pausedAt != null;
 
-  for (const button of document.querySelectorAll('#adjust button, #pause')) {
-    button.disabled = !hasTimer;
-  }
+  $('pause').disabled = !hasTimer;
   $('reset').disabled = !hasTimer;
+  $('undoClear').hidden = hasTimer || !cleared;
+  if (hasTimer) cleared = null;
   $('pause').textContent = paused ? 'Resume' : 'Pause';
 
   if (!hasTimer) {
     status.className = 'status';
-    status.textContent = 'No timer set – the screen shows only the clock.';
+    status.textContent = cleared ? 'Timer cleared.' : 'No timer set – the screen shows only the clock.';
     return;
   }
 
   const end = paused ? now + ms : state.endTime;
   const phase = countdownPhase(ms, state);
   const left = `<strong>${formatPrecise(ms)}</strong>`;
-  const onScreen = `screen shows “${formatCountdown(ms, state)}”`;
+  const shown = formatCountdown(ms, state);
+  const onScreen = shown.startsWith('~') ? ` · screen shows “${shown}”` : '';
   status.className = `status ${phase}`;
   if (paused) {
-    status.innerHTML = `Paused – ${left} left · ${onScreen}`;
+    status.innerHTML = `Paused – ${left} left${onScreen}`;
   } else if (phase === 'over') {
     status.innerHTML = `Time is up – ${left} · ended at ${formatTime(end, state, true)}`;
   } else {
-    status.innerHTML = `${left} left · ends at ${formatTime(end, state, true)} · ${onScreen}`;
+    status.innerHTML = `${left} left · ends at ${formatTime(end, state, true)}${onScreen}`;
   }
 
   // Keep the end time field in sync, but don't overwrite what's being typed.

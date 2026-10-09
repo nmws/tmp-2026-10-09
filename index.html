@@ -38,19 +38,10 @@
           <button type="submit">Set end time</button>
         </form>
 
-        <div class="row" id="adjust">
-          <span>Adjust</span>
-          <button data-adjust="-5">−5 min</button>
-          <button data-adjust="-1">−1 min</button>
-          <button data-adjust="1">+1 min</button>
-          <button data-adjust="5">+5 min</button>
-          <button data-adjust="10">+10 min</button>
-          <button data-adjust="15">+15 min</button>
-        </div>
-
         <div class="row">
           <button id="pause">Pause</button>
           <button id="reset" class="danger">Clear timer</button>
+          <button id="undoClear" hidden>Undo</button>
         </div>
       </section>
 
@@ -68,9 +59,6 @@
       <section>
         <h2>Display</h2>
         <div class="row">
-          <label class="grow">Title <input id="title" type="text" placeholder="e.g. Mathematics – Paper 1" class="grow"></label>
-        </div>
-        <div class="row">
           <label><input type="checkbox" data-setting="showClock"> Current time</label>
           <label><input type="checkbox" data-setting="clockSeconds"> with seconds</label>
           <label><input type="checkbox" data-setting="showEnd"> End time</label>
@@ -86,19 +74,19 @@
           </label>
         </div>
         <div class="row">
-          <label>Orange at <input type="number" min="0" data-setting="orangeMin"> min left</label>
-          <label>Red at <input type="number" min="0" data-setting="redMin"> min left</label>
+          <label>Orange, with seconds, in the last <input type="number" min="0" data-setting="orangeMin"> min (red once time is up)</label>
         </div>
         <div class="row">
-          <label>Round to <input type="number" min="1" data-setting="coarseStepMin"> min</label>
+          <label><input type="checkbox" data-setting="roundCountdown"> Round the countdown (shown as “~”)</label>
+          <label>to <input type="number" min="1" data-setting="coarseStepMin"> min</label>
           <label>while more than <input type="number" min="0" data-setting="coarseAboveMin"> min left</label>
-          <label>Show seconds in the last <input type="number" min="0" data-setting="secondsBelowMin"> min</label>
         </div>
         <div class="row">
           <label>Max clarification text size <input type="number" min="1" max="30" data-setting="notesMaxPct"> % of screen height</label>
         </div>
         <div class="row">
-          <label>Timer height with clarifications <input type="number" min="10" max="80" data-setting="timingPct"> %</label>
+          <label>Timer height <input type="number" min="10" max="80" data-setting="timingPct"> % of screen height</label>
+          <label>shrinking to <input type="number" min="10" max="80" data-setting="timingMinPct"> % if the clarifications need room</label>
         </div>
         <div class="row">
           <button id="resetSettings">Restore default display settings</button>

@@ -3,7 +3,7 @@
   --muted: #a0a0a0;
   --orange: #ff9f1a;
   --red: #ff4136;
-  --timing-h: 30%;
+  --timing-h: 40%;
 }
 
 html, body {
@@ -30,23 +30,13 @@ body.idle { cursor: none; }
   padding: 3vh 3vw;
 }
 
-#title {
-  margin: 0;
-  font-size: 5vh;
-  line-height: 1.15;
-  text-align: center;
-  overflow-wrap: anywhere;
-}
-#title:empty { display: none; }
-body.has-notes #title { font-size: 3.5vh; }
-
+/* The timer strip always reserves its space; the clarifications use the rest. */
 #timing {
-  flex: 1 1 0;
+  flex: 0 0 var(--timing-h);
   min-height: 0;
   display: grid;
   gap: 2vh 4vw;
 }
-body.has-notes #timing { flex: 0 0 var(--timing-h); }
 
 .box {
   display: flex;
@@ -59,14 +49,13 @@ body.has-notes #timing { flex: 0 0 var(--timing-h); }
 .label {
   flex: none;
   color: var(--muted);
-  font-size: 3.2vh;
+  font-size: 2.5vh;
   line-height: 1.2;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-body.has-notes .label { font-size: 2.5vh; }
 
 .value {
   flex: 1 1 0;
@@ -84,7 +73,6 @@ body.has-notes .label { font-size: 2.5vh; }
 #count { font-weight: 700; }
 #countBox .value { transition: color 2s; }
 #countBox.orange .value { color: var(--orange); }
-#countBox.red .value,
 #countBox.over .value { color: var(--red); }
 #countBox.over .label { color: var(--red); }
 #countBox.paused .value { opacity: 0.55; }
@@ -94,11 +82,9 @@ body.has-notes .label { font-size: 2.5vh; }
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 1vh;
   border-top: 0.3vh solid #444;
   padding-top: 1.5vh;
 }
-#notes .label { text-align: left; }
 body:not(.has-notes) #notes { display: none; }
 
 #notesBody {

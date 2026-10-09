@@ -12,19 +12,18 @@ const SIZE_KEY = 'examClock.displaySize.v1';
 const MINUTE = 60 * 1000;
 
 const DEFAULT_SETTINGS = {
-  title: '',
   showClock: true,
   clockSeconds: false,
   showEnd: true,
   showCountdown: true,
   hourCycle: 'auto',     // 'auto' | 'h23' | 'h12'
-  orangeMin: 15,         // countdown turns orange at or below this many minutes
-  redMin: 5,             // ...and red at or below this
-  coarseAboveMin: 30,    // above this, round the countdown to coarseStepMin
+  orangeMin: 5,          // countdown turns orange (and shows seconds) at or below this many minutes
+  roundCountdown: false, // round the countdown to coarseStepMin, shown with a ~ prefix
+  coarseAboveMin: 30,    // when rounding: above this, round to coarseStepMin
   coarseStepMin: 5,
-  secondsBelowMin: 3,    // at or below this, show minutes and seconds
   notesMaxPct: 8,        // largest clarification font, % of screen height
-  timingPct: 30,         // timer strip height when clarifications are shown, %
+  timingPct: 40,         // timer strip height, % of screen height
+  timingMinPct: 25,      // ...which shrinks to this when the clarifications need the room
 };
 
 const DEFAULT_STATE = {
@@ -83,18 +82,17 @@ function formatHMS(totalSec) {
   return h ? `${h}:${pad2(m)}:${pad2(s)}` : `${m}:${pad2(s)}`;
 }
 
-// The deliberately coarse countdown shown on the projector.
-// Values are rounded *up*, so "5 min" means "at most 5 minutes left".
+// The countdown shown on the projector. Precise by default; with
+// `roundCountdown` the minutes are rounded *up* and prefixed with "~", so
+// "~5 min" means "at most 5 minutes left". Seconds appear from orange onwards.
 function formatCountdown(ms, s) {
   if (ms <= 0) {
     const over = Math.floor(-ms / 1000);
     return over === 0 ? '0:00' : '−' + formatHMS(over);
   }
-  if (ms > s.secondsBelowMin * MINUTE) {
-    const step = ms > s.coarseAboveMin * MINUTE ? Math.max(1, s.coarseStepMin) : 1;
-    return formatHM(Math.ceil(ms / (step * MINUTE)) * step);
-  }
-  return formatHMS(Math.ceil(ms / 1000));
+  if (!s.roundCountdown || ms <= s.orangeMin * MINUTE) return formatHMS(Math.ceil(ms / 1000));
+  const step = ms > s.coarseAboveMin * MINUTE ? Math.max(1, s.coarseStepMin) : 1;
+  return '~' + formatHM(Math.ceil(ms / (step * MINUTE)) * step);
 }
 
 // Precise countdown for the control panel.
@@ -105,7 +103,6 @@ function formatPrecise(ms) {
 
 function countdownPhase(ms, s) {
   if (ms <= 0) return 'over';
-  if (ms <= s.redMin * MINUTE) return 'red';
   if (ms <= s.orangeMin * MINUTE) return 'orange';
   return 'normal';
 }
