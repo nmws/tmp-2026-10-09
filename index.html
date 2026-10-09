@@ -13,7 +13,8 @@
   <header>
     <h1>Exam Clock</h1>
     <button id="openDisplay" class="primary">Open display window</button>
-    <span class="hint">Move it to the projector, then double-click it (or press F) for full screen.</span>
+    <span class="hint" id="openHint">Move it to the projector, then double-click it (or press F) for full screen.</span>
+    <span class="hint" id="popupBlocked" hidden>The browser blocked the pop-up. <a href="display.html" target="examClockDisplay">Open the display in a new tab</a> instead, or use “Full screen” on the preview.</span>
   </header>
 
   <main>
@@ -108,7 +109,10 @@
     <aside>
       <h2>On screen now</h2>
       <div id="previewFrame"><iframe id="preview" src="display.html" title="Display preview" tabindex="-1"></iframe></div>
-      <p class="hint">Live preview of the display window, in its current shape.</p>
+      <div class="preview-bar">
+        <p class="hint">Live preview of the display window, in its current shape.</p>
+        <button id="previewFullscreen" title="Useful when the projector mirrors this screen">Full screen</button>
+      </div>
     </aside>
   </main>
 

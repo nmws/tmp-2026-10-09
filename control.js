@@ -13,14 +13,35 @@ function update(changes) {
   render();
 }
 
+// Asks for a second click within a few seconds before a destructive action.
+// (No confirm() dialog: it's easy to dismiss by accident, and some embeds block it.)
+function confirmedClick(button, question) {
+  if (button.confirmRestore) {
+    button.confirmRestore();
+    return true;
+  }
+  const label = button.textContent;
+  button.textContent = question;
+  button.classList.add('confirming');
+  const timer = setTimeout(() => button.confirmRestore(), 4000);
+  button.confirmRestore = () => {
+    clearTimeout(timer);
+    button.textContent = label;
+    button.classList.remove('confirming');
+    button.confirmRestore = null;
+  };
+  return false;
+}
+
 // ---- Timer -------------------------------------------------------------------
 
 $('durationForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const minutes = (Number($('durH').value) || 0) * 60 + (Number($('durM').value) || 0);
   if (minutes <= 0) return;
-  if (state.endTime != null && remainingMs(state, Date.now()) > 0 &&
-      !confirm('A timer is already running. Restart it?')) return;
+  const running = state.endTime != null && remainingMs(state, Date.now()) > 0;
+  if (running && !confirmedClick(e.submitter || $('durationForm').querySelector('button'),
+      'Restart? Click again')) return;
   update({ endTime: roundToSecond(Date.now()) + minutes * MINUTE, pausedAt: null });
 });
 
@@ -50,8 +71,8 @@ $('pause').addEventListener('click', () => {
   }
 });
 
-$('reset').addEventListener('click', () => {
-  if (confirm('Clear the timer? The display will show only the clock.')) {
+$('reset').addEventListener('click', (e) => {
+  if (confirmedClick(e.currentTarget, 'Clear? Click again')) {
     update({ endTime: null, pausedAt: null });
   }
 });
@@ -179,8 +200,17 @@ function render() {
 
 $('openDisplay').addEventListener('click', () => {
   const win = window.open('display.html', 'examClockDisplay', 'popup,width=1280,height=720');
-  if (!win) alert('The browser blocked the pop-up window. Please allow pop-ups for this page.');
-  else win.focus();
+  $('popupBlocked').hidden = !!win;
+  $('openHint').hidden = !win;
+  if (win) win.focus();
+});
+
+// Show the preview itself full screen, for when the projector mirrors this screen.
+$('previewFullscreen').addEventListener('click', () => {
+  $('previewFrame').requestFullscreen?.().catch(() => {});
+});
+$('previewFrame').addEventListener('dblclick', () => {
+  if (document.fullscreenElement) document.exitFullscreen();
 });
 
 const previewFrame = $('previewFrame');
