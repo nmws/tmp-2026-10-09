@@ -5,7 +5,7 @@ const isPreview = window.self !== window.top; // embedded in the control panel
 
 const $ = (id) => document.getElementById(id);
 const els = {
-  title: $('title'),
+  screen: $('screen'),
   timing: $('timing'),
   clockBox: $('clockBox'), clock: $('clock'),
   countBox: $('countBox'), count: $('count'), countLabel: $('countLabel'),
@@ -47,13 +47,15 @@ function largestFitting(el, lo, hi, fits) {
 
 // The text a value is sized for: every digit replaced by "8", so the size
 // doesn't jump around as the digits change. The countdown is sized for the
-// widest text of its current format ("1 h 55 min" and "2 h" get the same size).
+// widest text of its current format ("~1 h 55 min" and "~2 h" get the same size,
+// and "9:59" the same as "10:00").
 function sizingTemplate(span) {
   const template = span.textContent.replace(/\d+/g, (d) => '8'.repeat(d.length));
   if (span !== els.count) return template;
-  if (template.includes('h')) return '8 h 88 min';
-  if (template.includes('min')) return '88 min';
-  return template;
+  const prefix = template.startsWith('~') ? '~' : '';
+  if (template.includes('h')) return prefix + '8 h 88 min';
+  if (template.includes('min')) return prefix + '88 min';
+  return template.replace(/^(−?)8:88$/, '$188:88');
 }
 
 // Font size for a single-line value.
@@ -73,46 +75,43 @@ function fittedSize(span) {
   return size;
 }
 
-function fitNotes() {
+// Sizes the timer strip and the clarifications together. The strip keeps its
+// full height until the clarifications, at their largest size, no longer fit in
+// the rest; then it shrinks, but never below its minimum. Whatever still
+// doesn't fit is handled by shrinking the clarification text.
+function fitNotes(hasNotes) {
   const box = els.notesBody;
   const el = els.notesInner;
-  const max = Math.max(6, (window.innerHeight * state.notesMaxPct) / 100);
-  const size = largestFitting(el, 6, max, () =>
+  const root = document.documentElement.style;
+  const maxPx = (window.innerHeight * state.timingPct) / 100;
+  const minPx = Math.min(maxPx, (window.innerHeight * state.timingMinPct) / 100);
+  root.setProperty('--timing-h', maxPx + 'px');
+  if (!hasNotes) return;
+
+  const maxSize = Math.max(6, (window.innerHeight * state.notesMaxPct) / 100);
+  el.style.fontSize = maxSize + 'px';
+  const overflow = el.offsetHeight - box.clientHeight;
+  if (overflow > 0) {
+    root.setProperty('--timing-h', Math.max(minPx, maxPx - overflow) + 'px');
+  }
+  const size = largestFitting(el, 6, maxSize, () =>
     el.offsetHeight <= box.clientHeight && el.scrollWidth <= box.clientWidth);
   el.style.fontSize = size + 'px';
 }
 
 // ---- Layout --------------------------------------------------------------
 
-function applyLayout(visible, hasNotes) {
+// Clock | countdown | end time in one row, in a strip of reserved height.
+function applyLayout(visible) {
   for (const [id, box] of Object.entries(boxes)) {
     box.hidden = !visible.includes(id);
     box.style.gridArea = id;
   }
-  const row = (ids) => `"${ids.join(' ')}"`;
-  let areas, cols, rows;
-  if (!visible.length) {
-    areas = 'none'; cols = 'none'; rows = 'none';
-  } else if (hasNotes || !visible.includes('count')) {
-    // One row: clock | countdown | end time.
-    areas = row(visible);
-    cols = visible.map((id) => (id === 'count' ? '1.6fr' : '1fr')).join(' ');
-    rows = '1fr';
-  } else {
-    // Clock and end time on top, a big countdown underneath.
-    const small = visible.filter((id) => id !== 'count');
-    if (small.length) {
-      areas = row(small) + ' ' + row(small.map(() => 'count'));
-      cols = small.map(() => '1fr').join(' ');
-      rows = '1fr 3fr';
-    } else {
-      areas = row(['count']); cols = '1fr'; rows = '1fr';
-    }
-  }
+  const none = !visible.length;
   Object.assign(els.timing.style, {
-    gridTemplateAreas: areas,
-    gridTemplateColumns: cols,
-    gridTemplateRows: rows,
+    gridTemplateAreas: none ? 'none' : `"${visible.join(' ')}"`,
+    gridTemplateColumns: none ? 'none' : visible.map((id) => (id === 'count' ? '1.6fr' : '1fr')).join(' '),
+    gridTemplateRows: none ? 'none' : '1fr',
   });
 }
 
@@ -140,16 +139,20 @@ function render() {
     notesDirty = true;
   }
 
-  const layout = [visible, hasNotes, s.title, s.timingPct, s.notesMaxPct, s.notesColumns,
+  const layout = [visible, hasNotes, s.timingPct, s.timingMinPct, s.notesMaxPct, s.notesColumns,
     window.innerWidth, window.innerHeight].join('|');
   if (layout !== lastLayout) {
     lastLayout = layout;
-    setText(els.title, s.title.trim());
     document.body.classList.toggle('has-notes', hasNotes);
-    document.documentElement.style.setProperty('--timing-h', s.timingPct + '%');
     els.notesInner.style.columnCount = Math.max(1, Math.round(s.notesColumns) || 1);
-    applyLayout(visible, hasNotes);
+    applyLayout(visible);
     notesDirty = true;
+  }
+
+  // The timer strip's height depends on the clarifications, so fit them first.
+  if (notesDirty) {
+    notesDirty = false;
+    fitNotes(hasNotes);
   }
 
   setText(els.clock, formatTime(now, s, s.clockSeconds));
@@ -171,11 +174,6 @@ function render() {
   for (const id of visible) sizes[id] = fittedSize(spans[id]);
   if (sizes.clock && sizes.end) sizes.clock = sizes.end = Math.min(sizes.clock, sizes.end);
   for (const id of visible) spans[id].style.fontSize = sizes[id] + 'px';
-
-  if (notesDirty && hasNotes) {
-    notesDirty = false;
-    fitNotes();
-  }
 }
 
 function refit() {
