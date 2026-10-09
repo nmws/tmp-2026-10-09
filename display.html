@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exam Clock – Display</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap">
+  <link rel="stylesheet" href="display.css">
+</head>
+<body>
+  <main id="screen">
+    <h1 id="title"></h1>
+    <section id="timing">
+      <div class="box" id="clockBox">
+        <div class="label">Current time</div>
+        <div class="value"><span id="clock"></span></div>
+      </div>
+      <div class="box" id="countBox">
+        <div class="label" id="countLabel">Time remaining</div>
+        <div class="value"><span id="count"></span></div>
+      </div>
+      <div class="box" id="endBox">
+        <div class="label" id="endLabel">Exam ends at</div>
+        <div class="value"><span id="end"></span></div>
+      </div>
+    </section>
+    <section id="notes">
+      <div class="label">Clarifications</div>
+      <div id="notesBody"><div id="notesInner"></div></div>
+    </section>
+  </main>
+  <div id="hint">Double-click or press F for full screen</div>
+
+  <script src="vendor/marked.min.js"></script>
+  <script src="shared.js"></script>
+  <script src="display.js"></script>
+</body>
+</html>

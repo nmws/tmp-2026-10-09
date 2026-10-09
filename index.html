@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exam Clock – Control panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+  <link rel="stylesheet" href="control.css">
+</head>
+<body>
+  <header>
+    <h1>Exam Clock</h1>
+    <button id="openDisplay" class="primary">Open display window</button>
+    <span class="hint">Move it to the projector, then double-click it (or press F) for full screen.</span>
+  </header>
+
+  <main>
+    <div class="controls">
+      <section>
+        <h2>Timer</h2>
+        <p id="status" class="status">No timer set.</p>
+
+        <form id="durationForm" class="row">
+          <label>Duration
+            <input id="durH" type="number" min="0" max="23" value="2" inputmode="numeric"> h
+          </label>
+          <label>
+            <input id="durM" type="number" min="0" max="59" value="0" inputmode="numeric"> min
+          </label>
+          <button type="submit">Start now</button>
+        </form>
+
+        <form id="endForm" class="row">
+          <label>Ends at <input id="endInput" type="time" required></label>
+          <button type="submit">Set end time</button>
+        </form>
+
+        <div class="row" id="adjust">
+          <span>Adjust</span>
+          <button data-adjust="-5">−5 min</button>
+          <button data-adjust="-1">−1 min</button>
+          <button data-adjust="1">+1 min</button>
+          <button data-adjust="5">+5 min</button>
+          <button data-adjust="10">+10 min</button>
+          <button data-adjust="15">+15 min</button>
+        </div>
+
+        <div class="row">
+          <button id="pause">Pause</button>
+          <button id="reset" class="danger">Clear timer</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>Clarifications</h2>
+        <textarea id="notes" rows="8" spellcheck="true"
+          placeholder="e.g. **Question 3b:** assume g = 9.81 m/s²&#10;&#10;Markdown works: **bold**, *italic*, - lists, # headings"></textarea>
+        <div class="row">
+          <button id="publish" class="primary" title="Ctrl+Enter">Show on screen</button>
+          <button id="unpublish">Remove from screen</button>
+          <span id="notesStatus" class="hint"></span>
+        </div>
+      </section>
+
+      <section>
+        <h2>Display</h2>
+        <div class="row">
+          <label class="grow">Title <input id="title" type="text" placeholder="e.g. Mathematics – Paper 1" class="grow"></label>
+        </div>
+        <div class="row">
+          <label><input type="checkbox" data-setting="showClock"> Current time</label>
+          <label><input type="checkbox" data-setting="clockSeconds"> with seconds</label>
+          <label><input type="checkbox" data-setting="showEnd"> End time</label>
+          <label><input type="checkbox" data-setting="showCountdown"> Countdown</label>
+        </div>
+        <div class="row">
+          <label>Clock format
+            <select data-setting="hourCycle">
+              <option value="auto">Browser default</option>
+              <option value="h23">24-hour</option>
+              <option value="h12">12-hour</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label>Orange at <input type="number" min="0" data-setting="orangeMin"> min left</label>
+          <label>Red at <input type="number" min="0" data-setting="redMin"> min left</label>
+        </div>
+        <div class="row">
+          <label>Round to <input type="number" min="1" data-setting="coarseStepMin"> min</label>
+          <label>while more than <input type="number" min="0" data-setting="coarseAboveMin"> min left</label>
+          <label>Show seconds in the last <input type="number" min="0" data-setting="secondsBelowMin"> min</label>
+        </div>
+        <div class="row">
+          <label>Max clarification text size <input type="number" min="1" max="30" data-setting="notesMaxPct"> % of screen height</label>
+        </div>
+        <div class="row">
+          <label>Timer height with clarifications <input type="number" min="10" max="80" data-setting="timingPct"> %</label>
+        </div>
+        <div class="row">
+          <button id="resetSettings">Restore default display settings</button>
+        </div>
+      </section>
+    </div>
+
+    <aside>
+      <h2>On screen now</h2>
+      <div id="previewFrame"><iframe id="preview" src="display.html" title="Display preview" tabindex="-1"></iframe></div>
+      <p class="hint">Live preview of the display window, in its current shape.</p>
+    </aside>
+  </main>
+
+  <script src="shared.js"></script>
+  <script src="control.js"></script>
+</body>
+</html>
